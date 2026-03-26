@@ -3,7 +3,7 @@
   "tasks": {
     "start-backend": {
       "name": "Backend (FastAPI)",
-      "command": "cd backend && pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+      "command": "cd /project/crypto-interview/backend && pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
       "runAtStart": true,
       "preview": {
         "port": 8000
@@ -11,7 +11,7 @@
     },
     "start-frontend": {
       "name": "Frontend (Vite)",
-      "command": "cd frontend && npm install && npm run dev",
+      "command": "cd /project/crypto-interview/frontend && npm install && npm run dev",
       "runAtStart": true,
       "preview": {
         "port": 5173
