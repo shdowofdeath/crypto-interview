@@ -1,32 +1,18 @@
 {
   "version": "0.0.1",
   "tasks": {
-    "install-backend": {
-      "name": "Install backend dependencies",
-      "command": "pip install -r requirements.txt",
-      "runAtStart": true,
-      "cwd": "/workspace/crypto-interview/backend"
-    },
-    "install-frontend": {
-      "name": "Install frontend dependencies",
-      "command": "npm install",
-      "runAtStart": true,
-      "cwd": "/workspace/crypto-interview/frontend"
-    },
     "start-backend": {
-      "name": "Start backend (FastAPI)",
-      "command": "uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+      "name": "Backend (FastAPI)",
+      "command": "cd backend && pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
       "runAtStart": true,
-      "cwd": "/workspace/crypto-interview/backend",
       "preview": {
         "port": 8000
       }
     },
     "start-frontend": {
-      "name": "Start frontend (Vite)",
-      "command": "npm run dev",
+      "name": "Frontend (Vite)",
+      "command": "cd frontend && npm install && npm run dev",
       "runAtStart": true,
-      "cwd": "/workspace/crypto-interview/frontend",
       "preview": {
         "port": 5173
       }
