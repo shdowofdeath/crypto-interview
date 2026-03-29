@@ -9,6 +9,11 @@
         "port": 8000
       }
     },
+    "run-tests": {
+      "name": "Run tests",
+      "command": "cd /project/workspace/backend && pip install -r requirements.txt -q && pytest tests/ -v",
+      "runAtStart": false
+    },
     "start-frontend": {
       "name": "Frontend (Vite :5173)",
       "command": "cd /project/workspace/frontend && npm install && npm run dev",

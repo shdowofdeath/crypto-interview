@@ -81,7 +81,31 @@ Clicking a coin card should expand it to show market cap and 24h change details.
 
 ---
 
-### Category 2 — New Feature
+### Category 2 — Failing Tests
+
+There is a test suite in `backend/tests/test_performance.py`. Run it:
+
+```bash
+cd backend
+pytest tests/ -v
+```
+
+The tests cover concurrent request performance and portfolio calculation consistency.
+**Some tests are flaky** — they fail intermittently even when the code is correct.
+
+Your job:
+1. Run the tests multiple times and observe which ones are flaky
+2. For each flaky test: identify **why** it's flaky (the root cause in the test itself, not in your code)
+3. Fix the flaky tests so they are reliable — without weakening what they assert
+4. Make sure all tests pass after your bug fixes are applied
+
+Include a **"Tests" section** in your PR describing what was flaky and how you fixed it.
+
+> Hint: flaky tests are a code smell in themselves. A test that sometimes passes and sometimes fails is worse than no test — it trains engineers to ignore failures.
+
+---
+
+### Category 4 — New Feature
 
 **Add a coin search / filter bar to the price table.**
 
@@ -96,7 +120,7 @@ This is intentionally open-ended. Show us how you think about small UI features.
 
 ---
 
-### Category 3 — Code Review
+### Category 5 — Code Review
 
 Read the entire codebase as if you're reviewing a colleague's PR. In your PR description, include a **"Code Review" section** with:
 
