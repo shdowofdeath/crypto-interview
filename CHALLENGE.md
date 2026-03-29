@@ -1,103 +1,166 @@
-# CryptoWatch — Engineering Interview Challenge
+# CryptoWatch — Full-Stack Engineering Challenge
 
-Welcome. This is a real codebase, not a toy exercise.
+## Overview
 
-**Your job: make it work.**
+CryptoWatch is a live cryptocurrency dashboard with portfolio tracking.
 
----
+**Stack:**
+- Backend: Python + FastAPI, fetches live data from CoinGecko (free, no API key needed)
+- Frontend: React + TypeScript + Vite + Tailwind CSS
 
-## What Is This
-
-CryptoWatch is a live cryptocurrency price dashboard with portfolio tracking.
-
-- **Backend:** FastAPI (Python) — fetches live prices from CoinGecko
-- **Frontend:** React + Vite (TypeScript) — displays prices and portfolio value
-
-Right now, it has **8 bugs**. Some are subtle. Some are security issues.
-Some will only appear under load or with real data. Find them, fix them, explain
-your reasoning.
+The app has deliberate bugs and missing features. Your job is to find them, fix them, and extend the app — then open a PR explaining everything you did.
 
 ---
 
-## Getting Started
+## How to Run
 
-This repo is configured for **CodeSandbox** — it starts automatically.
+### Option A — CodeSandbox (recommended)
+Open the repo in CodeSandbox. Two tasks start automatically:
+- `Backend (FastAPI :8000)` — installs deps and starts the API server
+- `Frontend (Vite :5173)` — installs deps and starts the UI
 
-If running locally:
+Preview opens at port `5173`.
 
+### Option B — Local
+**Terminal 1 — Backend:**
 ```bash
-# Terminal 1 — backend
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-# Terminal 2 — frontend
+**Terminal 2 — Frontend:**
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- API docs: http://localhost:8000/docs
+- Backend API + docs: http://localhost:8000/docs
 
 ---
 
-## Your Task
+## Your Tasks
 
-### 1. Find and fix all 8 bugs
-
-The bugs are spread across backend and frontend. They range from a crash on
-every real API call, to a Python async antipattern, to a React closure bug,
-to a security misconfiguration.
-
-All bugs are in application code — not in config files or build tooling.
-
-**Fix root causes, not symptoms. The app must work end-to-end after your fixes.**
-
-### 2. Open a pull request
-
-Create a branch from `main`, commit your fixes, open a PR.
-
-The PR description is part of the assessment. It must include:
-
-- Each bug you found: **file, line, root cause**
-- How you fixed it and why
-- Any concerns about the codebase you'd raise in a real code review
-- Anything you'd do differently if building this from scratch
+You have **three categories** of work. Do all three. Each is assessed separately.
 
 ---
 
-## Hints
+### Category 1 — Bug Fixes
 
-You won't catch all 8 from a quick scan. Some require:
+There are **8 bugs** in the codebase. Find them all, fix them, and explain each one in your PR.
 
-- Reading the CoinGecko API docs to know what fields the response actually returns
-- Understanding how Python's asyncio event loop handles blocking I/O
-- Knowing the CORS spec well enough to spot the security antipattern
-- Understanding React's closure semantics in `useEffect`
+#### Backend Bugs
 
-If you find fewer than 8, keep looking. If you find more, tell us.
+**B1. Wrong portfolio calculation formula** — `backend/models/portfolio.py`
+The 24h percentage change calculation uses an incorrect mathematical formula. The result has wrong magnitude for all inputs and crashes on a specific edge case. Find it, fix it, prove why the current formula is wrong.
+
+**B2. Crash on every real API call** — `backend/services/coingecko.py`
+The backend crashes with a `KeyError` every time it tries to call CoinGecko. The wrong field name is being accessed from the API response. Check the actual CoinGecko `/coins/markets` response shape and fix the key. Also add a null guard for a field that can be `None`.
+
+**B3. Blocking I/O in async route** — `backend/services/coingecko.py`
+A synchronous HTTP library is used inside an async FastAPI route. This blocks the event loop and serializes all requests under load. Fix it correctly — not just by swapping libraries, but by making the function properly async end-to-end.
+
+**B4. CORS security misconfiguration** — `backend/main.py`
+The CORS middleware has a configuration that violates the browser security spec and would expose the API to any origin. Identify exactly why it's wrong, fix it, and explain the security impact.
+
+#### Frontend Bugs
+
+**B5. Prices never load from the backend** — `frontend/src/components/PriceTable.tsx`
+The price table always shows hardcoded mock data from January 2024. It never calls the backend API. Replace the mock data with a real fetch to `/api/prices`, with proper loading and error states.
+
+**B6. Refresh interval control doesn't work** — `frontend/src/components/PriceTable.tsx`
+The dropdown that controls how often prices refresh has no effect. The interval is always 30 seconds regardless of what the user selects. This is a React hooks bug — find the root cause and fix it.
+
+**B7. Price change colors are inverted** — `frontend/src/components/CryptoCard.tsx`
+Coins that went up show in red. Coins that went down show in green. Fix the display so green = positive, red = negative. The bug appears in two places in the component.
+
+**B8. Expanded card details are invisible** — `frontend/src/components/CryptoCard.tsx`
+Clicking a coin card should expand it to show market cap and 24h change details. The details render in the DOM but are completely invisible. Find the CSS issue and fix it.
 
 ---
 
-## Evaluation
+### Category 2 — New Feature
+
+**Add a coin search / filter bar to the price table.**
+
+Requirements:
+- Text input above the coin list
+- Filters coins in real time as the user types (by name or symbol)
+- If no coins match, show a friendly empty state
+- Works with both the mock data (before B5 is fixed) and real API data (after)
+- Styled consistently with the existing UI
+
+This is intentionally open-ended. Show us how you think about small UI features.
+
+---
+
+### Category 3 — Code Review
+
+Read the entire codebase as if you're reviewing a colleague's PR. In your PR description, include a **"Code Review" section** with:
+
+- At least 3 things you'd flag in a real review (beyond the 8 known bugs)
+- At least 1 concern about the backend architecture or reliability
+- At least 1 concern about the frontend data fetching approach
+- Any security or operational risks you'd raise before this goes to production
+
+There are no wrong answers here — we want to see how you think about production readiness.
+
+---
+
+## Pull Request Requirements
+
+Your PR description must include all of the following sections:
+
+### Bug Fixes
+For each bug: file, line number, root cause, fix, and why your fix is correct.
+
+### New Feature
+What you built, how it works, any tradeoffs you made.
+
+### Code Review
+Your observations from Category 3.
+
+### Test Plan
+A checklist of how to verify everything works end-to-end after your fixes.
+
+---
+
+## Evaluation Criteria
 
 | Area | What We Look For |
 |---|---|
 | Bug identification | Did you find all 8? Do you understand each root cause? |
-| Code quality | Are fixes idiomatic and production-appropriate? |
-| Security awareness | Did you identify and explain the CORS issue? |
-| Async understanding | Did you fix the blocking I/O correctly, not just swap libraries? |
-| Communication | Is your PR description clear, specific, and professional? |
+| Backend depth | Do you understand async Python and the CORS spec? |
+| Frontend depth | Do you understand React hooks and closures? |
+| Feature quality | Is the search feature clean, correct, and well-integrated? |
+| Code review | Do you think beyond the task? What do you catch proactively? |
+| Communication | Is your PR description specific, clear, and professional? |
 
 ---
 
 ## Rules
 
-- Do not add dependencies without justification
-- Do not refactor unrelated code
-- Do not use explanations you can't defend — we will ask follow-up questions on every fix in the live debrief
+- Do not add npm/pip packages without justification in the PR
+- Do not refactor code unrelated to your fixes or feature
+- Do not use explanations you cannot defend — the live debrief will include follow-up questions on every fix
+
+---
+
+## Debugging Tips
+
+```bash
+# Test the backend directly
+curl http://localhost:8000/health
+curl http://localhost:8000/api/prices
+curl http://localhost:8000/api/portfolio
+
+# Interactive API docs
+open http://localhost:8000/docs
+```
+
+The backend error messages are surfaced through the API — if `/api/prices` returns a 502, check the uvicorn terminal for the Python traceback.
 
 ---
 

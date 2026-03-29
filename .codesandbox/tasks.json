@@ -2,9 +2,20 @@
   "version": "0.0.1",
   "tasks": {
     "start-backend": {
-      "name": "Backend (FastAPI)",
-      "command": "find / -name 'requirements.txt' -path '*/crypto-interview/*' 2>/dev/null | head -5 && find / -name 'main.py' -path '*/crypto-interview/*' 2>/dev/null | head -5 && echo 'PWD:' && pwd && ls",
-      "runAtStart": true
+      "name": "Backend (FastAPI :8000)",
+      "command": "pip install -r /project/workspace/backend/requirements.txt && cd /project/workspace/backend && uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+      "runAtStart": true,
+      "preview": {
+        "port": 8000
+      }
+    },
+    "start-frontend": {
+      "name": "Frontend (Vite :5173)",
+      "command": "cd /project/workspace/frontend && npm install && npm run dev",
+      "runAtStart": true,
+      "preview": {
+        "port": 5173
+      }
     }
   }
 }
