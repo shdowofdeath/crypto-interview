@@ -105,7 +105,7 @@ Include a **"Tests" section** in your PR describing what was flaky and how you f
 
 ---
 
-### Category 4 — New Feature
+### Category 3 — New Feature
 
 **Add a coin search / filter bar to the price table.**
 
@@ -120,7 +120,7 @@ This is intentionally open-ended. Show us how you think about small UI features.
 
 ---
 
-### Category 5 — Code Review
+### Category 4 — Code Review
 
 Read the entire codebase as if you're reviewing a colleague's PR. In your PR description, include a **"Code Review" section** with:
 
