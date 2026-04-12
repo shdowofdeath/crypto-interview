@@ -41,7 +41,6 @@ export default function CryptoCard({ coin }: Props) {
     // `h-16` sets a fixed 64px height that only fits the collapsed state —
     // the expanded details panel is completely hidden by both constraints.
     //
-    // Fix: remove `overflow-hidden` and `h-16` so the card grows naturally.
     <div
       className="bg-gray-800 rounded-xl px-5 py-4 overflow-hidden h-16 cursor-pointer hover:bg-gray-900 transition-colors"
       onClick={() => setShowDetails((prev) => !prev)}
@@ -68,9 +67,7 @@ export default function CryptoCard({ coin }: Props) {
           </p>
           {/* BUG #7: Color classes are swapped.
               A positive change (price went up) shows in red — should be green.
-              A negative change (price went down) shows in green — should be red.
-              Fix: swap text-red-400 and text-green-400 so that
-              isPositive=true → text-green-400, isPositive=false → text-red-400 */}
+              A negative change (price went down) shows in green — should be red. */}
           <p
             className={clsx(
               "text-xs font-mono",

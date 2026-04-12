@@ -4,12 +4,6 @@ import CryptoCard from "./CryptoCard";
 // BUG #5: Hardcoded mock data — this component never calls the backend API.
 // The `coins` state is seeded with MOCK_DATA and fetchData() is a no-op.
 //
-// Fix:
-//   1. Remove MOCK_DATA entirely
-//   2. Initialize coins as an empty array: useState<Coin[]>([])
-//   3. Set loading to true initially: useState(true)
-//   4. Implement fetchData() to call fetch("/api/prices") and update state
-//   5. Handle loading and error states properly
 //
 // Reference: PortfolioSummary.tsx shows the correct pattern.
 const MOCK_DATA = [
@@ -86,8 +80,6 @@ export default function PriceTable() {
   // But because `refreshInterval` is missing from the useEffect dependency array,
   // the setInterval captures the initial value (30000ms) and never re-subscribes.
   // Changing the dropdown has no effect on the actual polling frequency.
-  //
-  // Fix: add `refreshInterval` to the dependency array: }, [refreshInterval]);
   const [refreshInterval, setRefreshInterval] = useState(30000);
 
   useEffect(() => {

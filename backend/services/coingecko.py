@@ -12,9 +12,6 @@ def fetch_prices():
     When called from an async FastAPI route, it blocks the entire asyncio
     event loop until the HTTP request completes. Under concurrent load, all
     requests queue behind each other instead of being handled concurrently.
-
-    Fix: convert to `async def fetch_prices()` using httpx.AsyncClient,
-    then await the response. Update callers in main.py to `await fetch_prices()`.
     """
     response = requests.get(
         f"{COINGECKO_URL}/coins/markets",

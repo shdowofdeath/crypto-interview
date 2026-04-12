@@ -15,9 +15,6 @@ app = FastAPI(title="CryptoWatch API")
 # in every browser. Beyond the spec violation, allowing all origins (*) means
 # any website on the internet can make requests to this API.
 #
-# Fix: replace allow_origins=["*"] with an explicit list of trusted origins,
-# e.g. ["http://localhost:5173"] for local dev. In production, read this
-# from an environment variable.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],      # BUG #4: wildcard

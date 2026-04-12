@@ -47,8 +47,6 @@ def compute_portfolio_value(prices: list, holdings: list = None) -> dict:
         # CoinGecko's price_change_percentage_24h means:
         #   current_price = previous_price * (1 + pct_change / 100)
         #
-        # Therefore to recover previous_price:
-        #   previous_price = current_price / (1 + pct_change / 100)   ← CORRECT
         #
         # The code below uses subtraction instead of division:
         #   previous_price = current_price * (1 - pct_change / 100)   ← BUG
