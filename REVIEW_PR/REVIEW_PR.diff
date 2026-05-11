@@ -1,0 +1,153 @@
+From: Sam Patel <sam@cryptowatch.example>
+Date: Mon, 18 Mar 2026 14:02:11 +0000
+Subject: [PATCH] [PERF-142] Add response cache + per-IP rate limiting
+
+---
+ backend/cache.py                  | 38 +++++++++++++++++++++++++
+ backend/middleware/__init__.py    |  0
+ backend/middleware/rate_limit.py  | 51 +++++++++++++++++++++++++++++++++
+ backend/main.py                   | 18 ++++++++++--
+ 4 files changed, 105 insertions(+), 2 deletions(-)
+ create mode 100644 backend/cache.py
+ create mode 100644 backend/middleware/__init__.py
+ create mode 100644 backend/middleware/rate_limit.py
+
+diff --git a/backend/cache.py b/backend/cache.py
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/backend/cache.py
+@@ -0,0 +1,38 @@
++"""Tiny in-memory response cache.
++
++Usage:
++    from cache import cache
++    cached = cache.get("prices")
++    if cached is None:
++        cached = await fetch_prices()
++        cache.set("prices", cached, ttl=60)
++"""
++
++import time
++from typing import Any
++
++
++class ResponseCache:
++    def __init__(self):
++        self._store: dict[str, tuple[float, Any]] = {}
++
++    def get(self, key: str) -> Any | None:
++        entry = self._store.get(key)
++        if entry is None:
++            return None
++        expires_at, value = entry
++        if expires_at < time.time():
++            del self._store[key]
++            return None
++        return value
++
++    def set(self, key: str, value: Any, ttl: int = 60) -> None:
++        self._store[key] = (time.time() + ttl, value)
++
++    def clear(self) -> None:
++        self._store.clear()
++
++
++# Module-level singleton — shared across all requests
++cache = ResponseCache()
++
+diff --git a/backend/middleware/__init__.py b/backend/middleware/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/middleware/rate_limit.py b/backend/middleware/rate_limit.py
+new file mode 100644
+index 0000000..d4e5f6a
+--- /dev/null
++++ b/backend/middleware/rate_limit.py
+@@ -0,0 +1,51 @@
++"""Per-IP sliding-window rate limiter.
++
++Tracks request timestamps per client IP and rejects requests that exceed
++the configured rate.
++"""
++
++import time
++import logging
++from collections import defaultdict, deque
++
++from fastapi import Request
++from fastapi.responses import JSONResponse
++
++log = logging.getLogger("rate_limit")
++
++# requests per window, in seconds
++RATE_LIMIT = 60
++WINDOW_SECONDS = 60
++
++_buckets: dict[str, deque] = defaultdict(deque)
++
++# TODO: prune old keys — _buckets grows unbounded
++
++
++async def rate_limit_middleware(request: Request, call_next):
++    client_ip = request.headers.get("x-forwarded-for") or (
++        request.client.host if request.client else "unknown"
++    )
++
++    now = time.time()
++    bucket = _buckets[client_ip]
++
++    while bucket and bucket[0] < now - WINDOW_SECONDS:
++        bucket.popleft()
++
++    if len(bucket) >= RATE_LIMIT:
++        log.info("rate limit hit for %s (full request: %s)", client_ip, request.url)
++        return JSONResponse(
++            status_code=429,
++            content={"detail": "Rate limit exceeded"},
++        )
++
++    bucket.append(now)
++    response = await call_next(request)
++    response.headers["X-RateLimit-Remaining"] = str(RATE_LIMIT - len(bucket))
++    response.headers["X-Client-IP"] = client_ip
++    return response
++
+diff --git a/backend/main.py b/backend/main.py
+index abcdef1..1234567 100644
+--- a/backend/main.py
++++ b/backend/main.py
+@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
+ from logging_config import configure_logging
+ from services.coingecko import fetch_prices, fetch_image
+ from models.portfolio import compute_portfolio_value, PortfolioRequest
++from cache import cache
++from middleware.rate_limit import rate_limit_middleware
+
+ configure_logging()
+ log = logging.getLogger("cryptowatch")
+@@ -22,6 +24,8 @@ app.add_middleware(
+     allow_headers=["*"],
+ )
+
++app.middleware("http")(rate_limit_middleware)
++
+
+ @app.middleware("http")
+ async def access_log(request: Request, call_next):
+@@ -48,8 +52,18 @@ async def health():
+ @app.get("/api/prices")
+ async def get_prices():
+     """Return current prices for tracked coins."""
++    cached = cache.get("prices")
++    if cached is not None:
++        log.info("cache hit for /api/prices")
++        return {"data": cached}
++
+     try:
+         prices = await fetch_prices()
++        cache.set("prices", prices, ttl=60)
+         return {"data": prices}
+     except Exception as e:
+         log.warning("prices fetch failed: %s", e)
+         raise HTTPException(status_code=502, detail=f"Upstream error: {str(e)}")
