@@ -1,4 +1,4 @@
-# CryptoWatch — Staff Engineering Challenge
+# CryptoWatch — Engineering Challenge
 
 ## Overview
 
@@ -8,15 +8,15 @@ CryptoWatch is a live cryptocurrency dashboard with portfolio tracking.
 - Backend: Python 3.11 + FastAPI, fetches live data from CoinGecko (free, no API key required)
 - Frontend: React 18 + TypeScript + Vite + Tailwind CSS
 
-This codebase was inherited from a previous engineer. It has correctness bugs, performance bugs, security bugs, and reliability bugs. None of them are commented. Your job is to find them, explain them, fix them — and ship a feature on top.
+This codebase was inherited from a previous engineer. It has bugs spanning correctness, concurrency, security, and reliability. Your job is to find some of them, explain them, and review your teammate's PR.
 
-You should treat this the way you'd treat any production system you're newly on call for: read first, ask questions of the code, run things, look at logs.
+Treat this the way you'd treat a production system you just got paged on: read first, run it, look at logs, then act.
 
 ---
 
 ## How to Run
 
-Both servers run with **hot reload** out of the box. Save a file and the change is live.
+Both servers run with **hot reload**. Save a file and the change is live.
 
 ### Option A — CodeSandbox
 Open the repo in CodeSandbox. Two tasks start automatically:
@@ -44,94 +44,78 @@ npm run dev
 - Frontend: <http://localhost:5173>
 - Backend: <http://localhost:8000/docs>
 
-The backend logger prints every request, every upstream call, and every exception to stdout. Keep that terminal visible — it is your debugger.
+The backend logs every request, every upstream call, and every exception. Keep that terminal visible — it is your debugger.
 
 ---
 
 ## What We Want From You
 
-Four categories of work. All four are evaluated.
+Four short tasks. Do what you can in the time available. Quality beats quantity on every one of them.
 
-### 1. Bug Hunt
+### 1. Find any 3 bugs
 
-There are **10–15 bugs** spread across backend, frontend, and tests. They span:
+There are bugs across the codebase — correctness, concurrency, security, reliability, UI. We are not telling you where they are or how many there are.
 
-- Correctness — wrong math, wrong aggregation, edge-case crashes
-- Concurrency — races, stale state, blocking I/O in async paths
-- Security — input validation, output handling, secrets, request forgery
-- Reliability — error handling, timeouts, swallowed failures
-- UI — colour semantics, layout, state propagation
+**Find any 3 and write them up.** For each:
+- File + line
+- One sentence on the symptom
+- One sentence on the root cause
+- The fix (committed to your branch, or pasted as a diff in the PR if quicker)
 
-We are **not** going to tell you which file each bug is in. We are not going to confirm a number. You should expect to find more than you think on the first pass.
+We care more about *which* 3 you pick and how well you explain them than how many you found. A sharp write-up of one nasty bug beats a list of five obvious ones.
 
-For each bug, in your PR description write:
-1. File + line
-2. Symptom (how would a user notice it?)
-3. Root cause (one or two sentences)
-4. Fix (what you changed, and why your fix is correct rather than a workaround)
+If you spot more than 3 while reading, mention them by name in your PR — no need to fully write them up.
 
-### 2. Flaky Tests
-
-`backend/tests/test_performance.py` contains tests that fail intermittently. Run them many times:
+### 2. The Tests
 
 ```bash
 cd backend
-for i in {1..10}; do pytest tests/ --tb=no -q; done
+pytest tests/ -v
 ```
 
-For each flaky test: identify why it's flaky, fix it without weakening what it asserts, and write a short note about it in your PR.
+One test fails deterministically. The test is correct — the code is wrong. Identify which test, explain why it's failing, and (if you've already fixed the underlying bug as part of task 1) confirm the test passes.
 
-One of the tests fails **deterministically** after a bug fix you ship. That's intended — the test is correct, and the existing code is wrong.
+Other tests in this file are flaky. You don't need to fix them — just note in your PR that they exist and one sentence on what makes them flaky.
 
-### 3. Feature — Price Alerts (build it)
+### 3. Code Review
 
-Users want to be notified when a coin crosses a price threshold. Build it.
+Open `REVIEW_PR/PR_DESCRIPTION.md` and `REVIEW_PR/REVIEW_PR.diff`.
 
-**Must-haves**
-- A user can create an alert: pick a coin, pick a direction (`above` / `below`), pick a price
-- A user can see their list of active alerts and delete them
-- When the current price crosses an active alert's threshold, the alert fires exactly once and is marked as triggered
+A teammate is asking for review before merging a rate-limiting + caching PR. Write the review as if you were posting it on GitHub: inline-style comments with line refs are fine.
 
-**Out of scope (don't build, but mention in your PR if relevant)**
-- Real authentication — assume a single user for now
-- Push notifications, email, SMS — surfacing the fire in the UI is enough
+We are looking for:
+- Concrete issues you'd block on
+- One design-level concern (would you take a different approach? why?)
+- One thing you'd *not* flag, with a one-line reason (taste matters)
 
-The backend has stub endpoints at `/api/alerts` (see `backend/main.py`) — finish them. Persistence layer is your call.
+A short, sharp review beats a long noisy one. 3–5 substantive comments is plenty.
 
-**This task is intentionally underspecified.** You decide the data shape, the storage, the polling strategy, the UI. Defend your choices in the PR. We care more about how you reason than which library you picked.
+### 4. Small Feature
 
-### 4. Code Review — Colleague's PR
+The backend has a stub `GET /api/alerts` endpoint in `backend/main.py` that returns 501. Implement it — return a hardcoded list of 1–2 sample price alerts in whatever response shape you think is right.
 
-Read `REVIEW_PR/PR_DESCRIPTION.md` and `REVIEW_PR/REVIEW_PR.diff`.
+We're looking at: your Pydantic model design, the response shape (would you put it in an envelope? flat list? include pagination metadata?), and the one-line defence of your choice in the PR.
 
-A teammate has opened a PR to add rate limiting and response caching. They've asked you for a review before they merge. Write your review as if you're posting it on GitHub — inline-style comments are fine.
-
-We're looking for:
-- Concrete issues you'd block on, with line refs
-- Design feedback (would you take a different approach? why?)
-- Anything that would surprise you in production
-- What you would *not* flag, and why (taste matters)
-
-There is no minimum number of comments. A short, sharp review beats a long noisy one.
+Don't wire it to the frontend. Don't add persistence. Don't build the create/delete endpoints.
 
 ---
 
-## PR Requirements
+## PR Description
 
-Open one PR with all your work. Title it `CryptoWatch take-home — <your name>`.
+Open one PR. Keep the description short. We suggest these sections:
 
-Your PR description must contain four sections, in this order:
+- **Bugs** — your 3 (+ any extras flagged by name)
+- **Test** — which test fails and why
+- **Code Review** — your review of `REVIEW_PR/`
+- **Alerts endpoint** — what shape you returned and why
 
-1. **Bug Fixes** — table or list, one row per bug, with the four fields above
-2. **Tests** — what was flaky, what you changed, what still needs human attention
-3. **Feature** — what you built, what tradeoffs you made, what you'd do next with another day
-4. **Review of REVIEW_PR** — your review comments
+A bulleted list is fine. We don't need formal headings or markdown gymnastics.
 
 ---
 
 ## Live Debrief
 
-After we read your PR, we'll schedule a 60-minute debrief. We will pick three of your bug-fix entries at random and ask you to defend them — including the math, the threat model, or the React semantics. We will also walk through your feature with the lens "what breaks first at 10k users."
+After we read your PR, we'll have a short call. We will pick one of your bug write-ups and one of your code-review comments and ask you to defend them — including the math, the threat model, or the React semantics.
 
 If you used an LLM, that's fine. If you can't defend an explanation it wrote, that's not.
 
@@ -139,19 +123,18 @@ If you used an LLM, that's fine. If you can't defend an explanation it wrote, th
 
 ## Rules
 
-- Don't add npm/pip packages without a one-line justification in the PR
+- Don't add npm/pip packages without a one-line justification
 - Don't refactor unrelated code
-- Don't suppress lint warnings without a reason
-- Don't `// @ts-expect-error` or `# type: ignore` without a comment explaining why
-- If you find a bug we didn't list, surface it. Bugs we didn't plan count for full credit.
+- If you find a bug we didn't list, surface it — bugs we didn't plan count for full credit
 
 ---
 
 ## Pointers
 
-- `backend/services/coingecko.py` is where upstream calls live
-- `backend/models/portfolio.py` is where the math lives
-- `frontend/src/components/PortfolioSummary.tsx` is clean — use it as the reference for how a React component in this codebase *should* look
-- `DEBUGGING_GUIDE.md` has commands and symptom-to-tool hints. It deliberately does **not** name any bug.
+- `backend/services/coingecko.py` — upstream HTTP calls
+- `backend/models/portfolio.py` — the math
+- `backend/main.py` — routes, including the alerts stub
+- `frontend/src/components/PortfolioSummary.tsx` — the clean reference component
+- `DEBUGGING_GUIDE.md` — commands and symptom-to-tool hints (does not name any bug)
 
 Good luck.
