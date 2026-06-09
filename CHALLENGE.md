@@ -48,9 +48,26 @@ The backend logs every request and exception to stdout — keep that terminal vi
 
 ## What We Want From You
 
-Four short tasks. Quality beats quantity on every one.
+Two short tasks. Quality beats quantity on every one.
 
-### 1. Bug Fixes
+### 1. Feature Implementation
+
+#### Alerts UI
+
+`backend/main.py` has a stub `GET /api/alerts` endpoint that returns 501. Your job:
+
+1. **Backend**: Implement the endpoint — return a hardcoded list of 1–2 sample price alerts in whatever response shape you think is right.
+2. **Frontend**: Add a simple UI component that fetches and displays these alerts. Choose where it belongs in the layout and how it renders (card, list, toast, etc.).
+
+We're looking at:
+- Your Pydantic model design
+- The response shape (envelope? flat list? pagination metadata?)
+- Where you placed the UI and how you presented the alerts
+- One line defending each choice in your PR
+
+Don't add persistence. Don't build the create/delete endpoints. Don't overcomplicate the UI.
+
+### 2. Bug Fixes
 
 The codebase contains the bugs listed below. Fix as many as you can and explain each in your PR.
 
@@ -109,38 +126,6 @@ Coin description HTML from CoinGecko is rendered via React's unsafe-inner-html p
 **F9 — Floating-point display in card details** · `frontend/src/components/CryptoCard.tsx`
 Expanding a card shows `$18600.000000000004` for some coins. *Hint: `0.1 + 0.2`.*
 
-### 2. The Test
-
-```bash
-cd backend
-pytest tests/ -v
-```
-
-One test fails deterministically — `test_portfolio_weighted_change_matches_value_weighting`. The test is correct; the code is wrong. After you fix **B1**, this test should pass.
-
-Other tests in the file are flaky for environmental reasons (tight timing thresholds, ratio assertions). You don't need to fix them — just note in your PR that you noticed them.
-
-### 3. Code Review
-
-Open `REVIEW_PR/PR_DESCRIPTION.md` and `REVIEW_PR/REVIEW_PR.diff`.
-
-A teammate is asking for review before merging a rate-limiting + caching PR. Write the review as if you were posting on GitHub: inline-style comments with line refs are fine.
-
-We are looking for:
-- Concrete issues you'd block on
-- One design-level concern (would you take a different approach? why?)
-- One thing you'd *not* flag, with a one-line reason (taste matters)
-
-3–5 substantive comments is plenty.
-
-### 4. Small Feature
-
-`backend/main.py` has a stub `GET /api/alerts` endpoint that returns 501. Implement it — return a hardcoded list of 1–2 sample price alerts in whatever response shape you think is right.
-
-We're looking at: your Pydantic model design, the response shape (envelope? flat list? pagination metadata?), and one line defending the choice in your PR.
-
-Don't wire it to the frontend. Don't add persistence. Don't build the create/delete endpoints.
-
 ---
 
 ## A Note on the Code Comments
@@ -155,10 +140,8 @@ This is itself part of the test. Real production codebases are full of comments 
 
 Open one PR. A bulleted list is fine. We suggest these sections:
 
+- **Feature: Alerts** — the backend response shape, where you placed the UI component, and why
 - **Bugs fixed** — one bullet per bug with your one-sentence root-cause
-- **Test** — confirm `test_portfolio_weighted_change_matches_value_weighting` now passes
-- **Code Review** — your review of `REVIEW_PR/`
-- **Alerts endpoint** — the response shape you returned and why
 
 ---
 
