@@ -29,8 +29,6 @@ def compute_portfolio_value(prices: list, holdings: list = None) -> dict:
     Returns:
         dict with `total_value_usd`, `holdings_detail`,
         and `total_change_24h_pct` (all rounded for display).
-
-    See ARCH-114 for the weighting model rationale.
     """
     if holdings is None:
         holdings = [

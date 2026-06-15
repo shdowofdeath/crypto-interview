@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import datetime, timezone
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import Response
@@ -8,6 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from logging_config import configure_logging
 from services.coingecko import fetch_prices, fetch_image
 from models.portfolio import compute_portfolio_value, PortfolioRequest
+from models.alerts import AlertCondition, AlertsResponse, PriceAlert
+
+
 
 configure_logging()
 log = logging.getLogger("cryptowatch")
@@ -110,16 +114,35 @@ async def coin_icon(url: str = Query(...)):
 # ── Price alerts (skeleton — see CHALLENGE.md task) ───────────────────────────
 
 
-@app.get("/api/alerts")
+@app.get("/api/alerts", response_model=AlertsResponse)
 async def list_alerts():
-    """List the current user's price alerts."""
-    raise HTTPException(status_code=501, detail="Not implemented")
+    """List the current user's price alerts (hardcoded sample data)."""
+    return AlertsResponse(data=[
+        PriceAlert(
+            id="alert-1",
+            coin_id="bitcoin",
+            symbol="BTC",
+            condition=AlertCondition.ABOVE,
+            target_price=120000.0,
+            current_price=103450.25,
+            created_at=datetime(2026, 6, 10, 9, 30, tzinfo=timezone.utc),
+        ),
+        PriceAlert(
+            id="alert-2",
+            coin_id="ethereum",
+            symbol="ETH",
+            condition=AlertCondition.BELOW,
+            target_price=2800.0,
+            current_price=3120.40,
+            created_at=datetime(2026, 6, 12, 14, 0, tzinfo=timezone.utc),
+        ),
+    ])
 
 
-@app.post("/api/alerts")
-async def create_alert():
-    """Create a new price alert."""
-    raise HTTPException(status_code=501, detail="Not implemented")
+# @app.post("/api/alerts")
+# async def create_alert():
+#     """Create a new price alert."""
+#     raise HTTPException(status_code=501, detail="Not implemented")
 
 
 @app.delete("/api/alerts/{alert_id}")
