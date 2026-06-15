@@ -1,6 +1,7 @@
 import React from "react";
 import PriceTable from "./components/PriceTable";
 import PortfolioSummary from "./components/PortfolioSummary";
+import PriceAlerts from "./components/PriceAlerts";
 
 function App() {
   return (
@@ -11,6 +12,8 @@ function App() {
           Live prices · Portfolio tracker
         </p>
       </header>
+
+      <PriceAlerts />
 
       <main className="max-w-4xl mx-auto px-6 py-8 space-y-10">
         <PortfolioSummary />
